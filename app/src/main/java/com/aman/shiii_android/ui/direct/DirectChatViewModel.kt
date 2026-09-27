@@ -71,8 +71,11 @@ class DirectChatViewModel @Inject constructor(
     private fun startRealtimePolling(user: AuthUser) {
         pollJob?.cancel()
         pollJob = viewModelScope.launch {
+            var cycleCount = 0
             while (isActive) {
-                delay(1500) // Ultra-fast 1.5s low latency polling
+                delay(600) // Ultra-fast 600ms responsive polling for real-time instant chatting vibe
+                cycleCount++
+
                 val currentMsgs = _uiState.value.messages
                 val maxId = currentMsgs.mapNotNull { it.numericId }.maxOrNull()
                 
@@ -90,19 +93,21 @@ class DirectChatViewModel @Inject constructor(
                     }
                 }
 
-                // Check read receipt status updates for messages sent by this user
-                val unreadUserMsgs = _uiState.value.messages.filter { it.senderId == user.id && !it.isRead }
-                if (unreadUserMsgs.isNotEmpty()) {
-                    val statusCheck: Result<List<DirectMessage>> = repository.getDirectMessages(user.token, markRead = false)
-                    statusCheck.onSuccess { refreshed: List<DirectMessage> ->
-                        val readMap = refreshed.associate { it.id to it.isRead }
-                        _uiState.update { state ->
-                            state.copy(
-                                messages = state.messages.map { msg ->
-                                    val serverIsRead = readMap[msg.id] ?: msg.isRead
-                                    if (serverIsRead != msg.isRead) msg.copy(isRead = serverIsRead) else msg
-                                }
-                            )
+                // Check read receipt status updates every 4th cycle (~2.4s) to avoid network queueing
+                if (cycleCount % 4 == 0) {
+                    val hasUnreadSentMsgs = _uiState.value.messages.any { it.senderId == user.id && !it.isRead }
+                    if (hasUnreadSentMsgs) {
+                        val statusCheck: Result<List<DirectMessage>> = repository.getDirectMessages(user.token, markRead = false)
+                        statusCheck.onSuccess { refreshed: List<DirectMessage> ->
+                            val readMap = refreshed.associate { it.id to it.isRead }
+                            _uiState.update { state ->
+                                state.copy(
+                                    messages = state.messages.map { msg ->
+                                        val serverIsRead = readMap[msg.id] ?: msg.isRead
+                                        if (serverIsRead != msg.isRead) msg.copy(isRead = serverIsRead) else msg
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -118,9 +123,9 @@ class DirectChatViewModel @Inject constructor(
         val state = _uiState.value
         val user = state.user ?: return
         val text = state.inputText.trim()
-        if (text.isBlank() || state.isSending) return
+        if (text.isBlank()) return
 
-        val localId = "local_${System.currentTimeMillis()}"
+        val localId = "local_${System.currentTimeMillis()}_${(1..999).random()}"
         val userMsg = DirectMessage(
             id = localId,
             numericId = null,
@@ -132,11 +137,11 @@ class DirectChatViewModel @Inject constructor(
             isRead = false
         )
 
+        // Instant 0ms optimistic UI rendering: message appears in the chat immediately!
         _uiState.update {
             it.copy(
                 messages = it.messages + userMsg,
-                inputText = "",
-                isSending = true
+                inputText = ""
             )
         }
 
@@ -148,14 +153,11 @@ class DirectChatViewModel @Inject constructor(
                         if (it.id == localId) serverMsg else it
                     }
                     _uiState.update {
-                        it.copy(
-                            messages = updated,
-                            isSending = false
-                        )
+                        it.copy(messages = updated)
                     }
                 },
                 onFailure = { err ->
-                    _uiState.update { it.copy(isSending = false, error = err.localizedMessage) }
+                    _uiState.update { it.copy(error = err.localizedMessage) }
                 }
             )
         }
