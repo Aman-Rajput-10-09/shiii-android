@@ -16,13 +16,15 @@ fun ShiiiAppNavigation() {
     var currentUser by remember { mutableStateOf(savedUser) }
     var showPairingScreen by remember { mutableStateOf(savedUser?.isPaired != true) }
 
-    // Real-time Notification Background Sync: Polls for new private, group & direct messages
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Real-time Notification Background Sync Service: Runs persistently even when app is closed
     LaunchedEffect(currentUser) {
         val user = currentUser
         if (user != null) {
-            authViewModel.notificationSyncManager.startSync(user)
+            com.aman.shiii_android.notification.ShiiiSyncForegroundService.startService(context)
         } else {
-            authViewModel.notificationSyncManager.stopSync()
+            com.aman.shiii_android.notification.ShiiiSyncForegroundService.stopService(context)
         }
     }
 
@@ -51,6 +53,7 @@ fun ShiiiAppNavigation() {
     }
 
     val handleLogout: () -> Unit = {
+        com.aman.shiii_android.notification.ShiiiSyncForegroundService.stopService(context)
         authViewModel.notificationSyncManager.stopSync()
         authViewModel.clearSavedUser()
         authViewModel.resetAuth()

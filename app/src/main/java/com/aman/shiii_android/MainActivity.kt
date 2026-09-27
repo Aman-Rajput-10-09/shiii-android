@@ -20,7 +20,11 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val requestNotificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ -> }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                com.aman.shiii_android.notification.ShiiiSyncForegroundService.startService(this)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +32,7 @@ class MainActivity : ComponentActivity() {
         com.aman.shiii_android.ui.character.ShiiiOverlaySettings.init(this)
         com.aman.shiii_android.ui.theme.AppThemeManager.init(this)
         requestNotificationPermissionIfNeeded()
+        com.aman.shiii_android.notification.ShiiiSyncForegroundService.startService(this)
         setContent {
             val isDark = com.aman.shiii_android.ui.theme.AppThemeManager.isDark()
             ShiiiandroidTheme(darkTheme = isDark) {
