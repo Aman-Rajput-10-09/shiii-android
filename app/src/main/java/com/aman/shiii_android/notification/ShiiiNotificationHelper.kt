@@ -28,9 +28,9 @@ class ShiiiNotificationHelper @Inject constructor(
 ) {
     companion object {
         private const val TAG = "ShiiiNotifHelper"
-        const val CHANNEL_PRIVATE_ID = "shiii_private_channel_v2"
-        const val CHANNEL_GROUP_ID = "shiii_group_channel_v2"
-        const val CHANNEL_DIRECT_ID = "shiii_direct_channel_v2"
+        const val CHANNEL_PRIVATE_ID = "shiii_private_channel_v3"
+        const val CHANNEL_GROUP_ID = "shiii_group_channel_v3"
+        const val CHANNEL_DIRECT_ID = "shiii_direct_channel_v3"
         private val notifCounter = AtomicInteger(2000)
     }
 
@@ -43,7 +43,13 @@ class ShiiiNotificationHelper @Inject constructor(
     private fun getAvatarBitmap(): Bitmap? {
         if (cachedAvatarBitmap == null) {
             try {
-                cachedAvatarBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.shiii_idle)
+                val opts = BitmapFactory.Options().apply {
+                    inSampleSize = 4 // Downsample 836x935 to ~209x233
+                }
+                val raw = BitmapFactory.decodeResource(context.resources, R.drawable.shiii_idle, opts)
+                if (raw != null) {
+                    cachedAvatarBitmap = Bitmap.createScaledBitmap(raw, 128, 128, true)
+                }
             } catch (e: Throwable) {
                 Log.w(TAG, "Failed to decode Shiii avatar for notification: ${e.message}")
             }
@@ -102,7 +108,7 @@ class ShiiiNotificationHelper @Inject constructor(
             manager.createNotificationChannel(privateChannel)
             manager.createNotificationChannel(groupChannel)
             manager.createNotificationChannel(directChannel)
-            Log.i(TAG, "Notification channels initialized successfully")
+            Log.i(TAG, "Notification channels v3 initialized successfully")
         }
     }
 
@@ -146,6 +152,7 @@ class ShiiiNotificationHelper @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_PRIVATE_ID)
                 .setSmallIcon(R.drawable.ic_stat_shiii)
+                .setColor(0xFFEA5E8C.toInt())
                 .setContentTitle("Shiii 💕 ($sender)")
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -156,7 +163,11 @@ class ShiiiNotificationHelper @Inject constructor(
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
 
-            getAvatarBitmap()?.let { builder.setLargeIcon(it) }
+            try {
+                getAvatarBitmap()?.let { builder.setLargeIcon(it) }
+            } catch (t: Throwable) {
+                Log.w(TAG, "Could not set large icon: ${t.message}")
+            }
 
             val notifId = msgId ?: notifCounter.incrementAndGet()
             NotificationManagerCompat.from(context).notify(notifId, builder.build())
@@ -193,6 +204,7 @@ class ShiiiNotificationHelper @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_GROUP_ID)
                 .setSmallIcon(R.drawable.ic_stat_shiii)
+                .setColor(0xFFEA5E8C.toInt())
                 .setContentTitle(title)
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -203,7 +215,11 @@ class ShiiiNotificationHelper @Inject constructor(
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
 
-            getAvatarBitmap()?.let { builder.setLargeIcon(it) }
+            try {
+                getAvatarBitmap()?.let { builder.setLargeIcon(it) }
+            } catch (t: Throwable) {
+                Log.w(TAG, "Could not set large icon: ${t.message}")
+            }
 
             val notifId = msgId ?: notifCounter.incrementAndGet()
             NotificationManagerCompat.from(context).notify(notifId, builder.build())
@@ -233,6 +249,7 @@ class ShiiiNotificationHelper @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_DIRECT_ID)
                 .setSmallIcon(R.drawable.ic_stat_shiii)
+                .setColor(0xFFEA5E8C.toInt())
                 .setContentTitle("$sender 💌")
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -243,7 +260,11 @@ class ShiiiNotificationHelper @Inject constructor(
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
 
-            getAvatarBitmap()?.let { builder.setLargeIcon(it) }
+            try {
+                getAvatarBitmap()?.let { builder.setLargeIcon(it) }
+            } catch (t: Throwable) {
+                Log.w(TAG, "Could not set large icon: ${t.message}")
+            }
 
             val notifId = msgId ?: notifCounter.incrementAndGet()
             NotificationManagerCompat.from(context).notify(notifId, builder.build())

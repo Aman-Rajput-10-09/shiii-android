@@ -61,7 +61,6 @@ class GroupChatViewModel @Inject constructor(
     }
 
     fun initUser(user: AuthUser) {
-        ScreenStateTracker.updateScreen(AppScreen.GROUP_CHAT)
         _uiState.update {
             it.copy(
                 user = user,

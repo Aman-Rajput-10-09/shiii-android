@@ -45,4 +45,18 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        com.aman.shiii_android.notification.ScreenStateTracker.updateScreen(
+            com.aman.shiii_android.notification.AppScreen.BACKGROUND
+        )
+    }
+
+    override fun onStop() {
+        super.onStop()
+        com.aman.shiii_android.notification.ScreenStateTracker.updateScreen(
+            com.aman.shiii_android.notification.AppScreen.BACKGROUND
+        )
+    }
 }

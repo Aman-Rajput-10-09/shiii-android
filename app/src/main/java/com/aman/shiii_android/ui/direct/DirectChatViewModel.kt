@@ -29,7 +29,6 @@ class DirectChatViewModel @Inject constructor(
     private var pollJob: Job? = null
 
     fun initUser(user: AuthUser) {
-        ScreenStateTracker.updateScreen(AppScreen.DIRECT_CHAT)
         val partner = user.partnerName ?: if (user.role.value == "master") "Mistress 💕" else "Master 🎩"
         _uiState.update {
             it.copy(

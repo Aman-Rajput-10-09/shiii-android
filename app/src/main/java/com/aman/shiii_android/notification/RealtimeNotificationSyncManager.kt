@@ -89,11 +89,11 @@ class RealtimeNotificationSyncManager @Inject constructor(
                     val activeScreen = ScreenStateTracker.currentScreen.value
                     val isPrivateScreen = (activeScreen == AppScreen.PRIVATE_CHAT) ||
                             (user.role.value == "master" && activeScreen == AppScreen.MASTER_BRIEFINGS)
-                    if (!isPrivateScreen) {
-                        val shiiiMsg = messages.lastOrNull { it.senderRole == "shiii" }
-                        if (shiiiMsg != null) {
-                            Log.i(TAG, "New private message from Shiii detected: ${shiiiMsg.content}")
-                            notificationHelper.showPrivateChatNotification("Shiii 🌸", shiiiMsg.content, shiiiMsg.numericId)
+                    val shiiiMsgs = messages.filter { it.senderRole == "shiii" }
+                    if (shiiiMsgs.isNotEmpty() && !isPrivateScreen) {
+                        for (msg in shiiiMsgs) {
+                            Log.i(TAG, "New private message from Shiii detected: ${msg.content}")
+                            notificationHelper.showPrivateChatNotification("Shiii 🌸", msg.content, msg.numericId)
                         }
                     }
                 }
@@ -112,12 +112,12 @@ class RealtimeNotificationSyncManager @Inject constructor(
 
                 if (!isFirstSync) {
                     val activeScreen = ScreenStateTracker.currentScreen.value
-                    if (activeScreen != AppScreen.GROUP_CHAT) {
-                        // Only notify if message is NOT sent by current user
-                        val incomingMsg = messages.lastOrNull { it.senderId != user.id && it.senderRole != user.role.value }
-                        if (incomingMsg != null) {
-                            Log.i(TAG, "New group message from ${incomingMsg.senderName} detected: ${incomingMsg.content}")
-                            notificationHelper.showGroupChatNotification(incomingMsg.senderName, incomingMsg.content, incomingMsg.numericId)
+                    val isLookingAtGroup = (activeScreen == AppScreen.GROUP_CHAT)
+                    val incoming = messages.filter { it.senderId != user.id }
+                    if (incoming.isNotEmpty() && !isLookingAtGroup) {
+                        for (msg in incoming) {
+                            Log.i(TAG, "New group message from ${msg.senderName} detected: ${msg.content}")
+                            notificationHelper.showGroupChatNotification(msg.senderName, msg.content, msg.numericId)
                         }
                     }
                 }
@@ -137,13 +137,13 @@ class RealtimeNotificationSyncManager @Inject constructor(
 
                 if (!isFirstSync) {
                     val activeScreen = ScreenStateTracker.currentScreen.value
-                    if (activeScreen != AppScreen.DIRECT_CHAT) {
-                        // Only notify for incoming messages from partner
-                        val incomingMsg = messages.lastOrNull { it.senderId != user.id && it.senderRole != user.role.value }
-                        if (incomingMsg != null) {
+                    val isLookingAtDirectChat = (activeScreen == AppScreen.DIRECT_CHAT)
+                    val incoming = messages.filter { it.senderId != user.id }
+                    if (incoming.isNotEmpty() && !isLookingAtDirectChat) {
+                        for (msg in incoming) {
                             val partnerDisplay = user.partnerName ?: (if (user.role.value == "master") "Mistress 💕" else "Master 🎩")
-                            Log.i(TAG, "New direct message from $partnerDisplay detected: ${incomingMsg.content}")
-                            notificationHelper.showDirectChatNotification(partnerDisplay, incomingMsg.content, incomingMsg.numericId)
+                            Log.i(TAG, "New direct message from $partnerDisplay detected: ${msg.content}")
+                            notificationHelper.showDirectChatNotification(partnerDisplay, msg.content, msg.numericId)
                         }
                     }
                 }
