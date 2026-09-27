@@ -113,6 +113,7 @@ class ShiiiRepositoryImpl @Inject constructor(
             numericId = dto.id,
             senderRole = dto.senderRole,
             content = dto.replyText,
+            englishText = dto.englishText,
             audioUrl = dto.audioUrl,
             visemes = visemes
         )
@@ -165,6 +166,7 @@ class ShiiiRepositoryImpl @Inject constructor(
                 numericId = dto.id,
                 senderRole = dto.senderRole,
                 content = dto.content,
+                englishText = dto.englishText,
                 audioUrl = dto.audioUrl,
                 visemes = visemes
             )
@@ -184,6 +186,7 @@ class ShiiiRepositoryImpl @Inject constructor(
                 senderRole = dto.senderRole,
                 senderName = dto.senderName,
                 content = dto.content,
+                englishText = dto.englishText,
                 audioUrl = dto.audioUrl,
                 visemes = visemes
             )
@@ -203,6 +206,7 @@ class ShiiiRepositoryImpl @Inject constructor(
                 senderRole = dto.senderRole,
                 senderName = dto.senderName,
                 content = dto.content,
+                englishText = dto.englishText,
                 audioUrl = dto.audioUrl,
                 visemes = visemes
             )

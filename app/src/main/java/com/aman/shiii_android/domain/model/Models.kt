@@ -46,6 +46,7 @@ data class ChatMessage(
     val numericId: Int? = null,
     val senderRole: String, // "master", "mistress", "shiii"
     val content: String,
+    val englishText: String? = null,
     val audioUrl: String? = null,
     val visemes: List<VisemeFrame> = emptyList(),
     val timestamp: Long = System.currentTimeMillis()
@@ -69,6 +70,7 @@ data class GroupMessage(
     val senderRole: String, // "master", "mistress", "shiii"
     val senderName: String,
     val content: String,
+    val englishText: String? = null,
     val audioUrl: String? = null,
     val visemes: List<VisemeFrame> = emptyList(),
     val timestamp: Long = System.currentTimeMillis()

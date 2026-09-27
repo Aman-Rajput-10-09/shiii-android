@@ -19,11 +19,35 @@ fun ShiiiAppNavigation() {
     // Real-time Notification Background Sync: Polls for new private, group & direct messages
     LaunchedEffect(currentUser) {
         val user = currentUser
-        if (user != null && user.isPaired) {
+        if (user != null) {
             authViewModel.notificationSyncManager.startSync(user)
         } else {
             authViewModel.notificationSyncManager.stopSync()
         }
+    }
+
+    // Auto-refresh couple status from server on start
+    LaunchedEffect(currentUser?.token) {
+        val user = currentUser ?: return@LaunchedEffect
+        try {
+            val statusRes = authViewModel.getCoupleStatus(user.token)
+            statusRes.onSuccess { status ->
+                if (status.isPaired != user.isPaired || status.coupleId != user.coupleId) {
+                    val updated = user.copy(
+                        isPaired = status.isPaired,
+                        coupleId = status.coupleId ?: user.coupleId,
+                        pairCode = status.pairCode,
+                        partnerName = status.partnerName ?: user.partnerName
+                    )
+                    authViewModel.saveUser(updated)
+                    currentUser = updated
+                    if (status.isPaired) {
+                        showPairingScreen = false
+                    }
+                    authViewModel.notificationSyncManager.updateUser(updated)
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     val handleLogout: () -> Unit = {

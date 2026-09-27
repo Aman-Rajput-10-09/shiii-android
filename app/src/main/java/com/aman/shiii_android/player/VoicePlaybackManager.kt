@@ -102,10 +102,24 @@ class VoicePlaybackManager @Inject constructor(
     }
 
     /**
-     * Speaks using Android native TextToSpeech engine with sweet Anime Girl voice tuning
+     * Extracts pure English speech text if the message contains an English translation tag
+     */
+    private fun extractSpeechText(raw: String): String {
+        val englishMatch = Regex("(?i)\\n?(?:english|translation):\\s*(.+)$").find(raw)
+        if (englishMatch != null) {
+            val en = englishMatch.groupValues[1].trim()
+            if (en.isNotBlank()) return en
+        }
+        return raw
+    }
+
+    /**
+     * Speaks using Android native TextToSpeech engine with sweet Anime Girl voice tuning.
+     * Guaranteed to speak in pure English so that TTS sounds smooth and cute without weird accents.
      */
     fun speakWithTts(text: String) {
-        val cleanText = text
+        val speechText = extractSpeechText(text)
+        val cleanText = speechText
             .replace(Regex("\\*[^*]+\\*"), "") // Remove stage directions like *hugs you*
             .replace(Regex("[^\\p{L}\\p{N}\\p{P}\\p{Z}]"), "") // Clean up emojis
             .trim()
@@ -115,14 +129,9 @@ class VoicePlaybackManager @Inject constructor(
         _isPlaying.value = true
         _currentPlayingUrl.value = "tts://$cleanText"
 
-        val isHindi = cleanText.any { it in '\u0900'..'\u097F' }
-        if (isHindi) {
-            tts?.language = Locale("hi", "IN")
-            applyAnimeVoiceTuning(isHindi = true)
-        } else {
-            tts?.language = Locale.US
-            applyAnimeVoiceTuning(isHindi = false)
-        }
+        // Always tune to fluent US English anime voice
+        tts?.language = Locale.US
+        applyAnimeVoiceTuning(isHindi = false)
 
         val utteranceId = "shiii_${System.currentTimeMillis()}"
         tts?.setPitch(1.62f)

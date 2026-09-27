@@ -57,6 +57,7 @@ data class VisemeCueDto(
 data class ChatResponseDto(
     @SerializedName("id") val id: Int? = null,
     @SerializedName("reply_text") val replyText: String,
+    @SerializedName("english_text") val englishText: String? = null,
     @SerializedName("audio_url") val audioUrl: String?,
     @SerializedName("visemes") val visemes: List<VisemeCueDto>?,
     @SerializedName("sender_role") val senderRole: String
@@ -66,6 +67,7 @@ data class ChatMessageDto(
     @SerializedName("id") val id: Int,
     @SerializedName("sender_role") val senderRole: String,
     @SerializedName("content") val content: String,
+    @SerializedName("english_text") val englishText: String? = null,
     @SerializedName("audio_url") val audioUrl: String? = null,
     @SerializedName("visemes") val visemes: List<VisemeCueDto>? = null,
     @SerializedName("created_at") val createdAt: String? = null
@@ -104,6 +106,7 @@ data class GroupMessageDto(
     @SerializedName("sender_role") val senderRole: String,
     @SerializedName("sender_name") val senderName: String,
     @SerializedName("content") val content: String,
+    @SerializedName("english_text") val englishText: String? = null,
     @SerializedName("audio_url") val audioUrl: String? = null,
     @SerializedName("visemes") val visemes: List<VisemeCueDto>? = null,
     @SerializedName("created_at") val createdAt: String? = null

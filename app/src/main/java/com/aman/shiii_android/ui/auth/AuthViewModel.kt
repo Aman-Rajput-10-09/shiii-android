@@ -31,6 +31,8 @@ class AuthViewModel @Inject constructor(
 
     fun clearSavedUser() = authPreferences.clear()
 
+    suspend fun getCoupleStatus(token: String) = repository.getCoupleStatus(token)
+
     fun onUsernameChange(value: String) = _uiState.update { it.copy(username = value, error = null) }
     fun onPasswordChange(value: String) = _uiState.update { it.copy(password = value, error = null) }
     fun onDisplayNameChange(value: String) = _uiState.update { it.copy(displayName = value, error = null) }

@@ -309,6 +309,77 @@ fun SettingsScreen(
             }
 
             // ==========================================
+            // 2.5 Real-Time Notifications & Alerts
+            // ==========================================
+            val hasNotifPermission = viewModel.notificationHelper.hasPermission()
+            SettingsSectionCard(title = "🔔 Notifications & Alerts", colors = colors) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (hasNotifPermission) Color(0xFF4CAF50).copy(alpha = 0.15f) else Color(0xFFFF5252).copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (hasNotifPermission) Icons.Default.NotificationsActive else Icons.Default.NotificationsOff,
+                                contentDescription = "Notification Status",
+                                tint = if (hasNotifPermission) Color(0xFF4CAF50) else Color(0xFFFF5252),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = if (hasNotifPermission) "Notifications Active ✨" else "Notifications Disabled ⚠️",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.textPrimary
+                            )
+                            Text(
+                                text = if (hasNotifPermission) "Direct, Group & Shiii alerts enabled" else "Permission required to receive message alerts",
+                                fontSize = 11.5.sp,
+                                color = colors.textSecondary
+                            )
+                        }
+                    }
+
+                    FilledTonalButton(
+                        onClick = {
+                            if (!hasNotifPermission) {
+                                try {
+                                    val intent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                        putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    }
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {
+                                    viewModel.sendTestNotification()
+                                }
+                            } else {
+                                viewModel.sendTestNotification()
+                            }
+                        },
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = colors.accentPink.copy(alpha = 0.18f),
+                            contentColor = colors.accentPink
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Text(if (hasNotifPermission) "Test 🔔" else "Enable ⚙️", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            // ==========================================
             // 3. Appearance & Theme
             // ==========================================
             SettingsSectionCard(title = "🎨 Appearance & Theme", colors = colors) {

@@ -502,6 +502,22 @@ fun MasterScreen(
                                                     color = if (isShiii) colors.receivedBubbleText else colors.sentBubbleText,
                                                     lineHeight = 19.sp
                                                 )
+                                                if (isShiii && !msg.englishText.isNullOrBlank() && msg.englishText != msg.content) {
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Surface(
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        color = (if (colors.isDark) Color(0x33A855F7) else Color(0x1AEA5E8C)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(
+                                                            text = "🇬🇧 ${msg.englishText}",
+                                                            fontSize = 11.5.sp,
+                                                            color = if (colors.isDark) Color(0xFFE9D5FF) else Color(0xFF6B21A8),
+                                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                            lineHeight = 16.sp
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }

@@ -32,6 +32,8 @@ import com.aman.shiii_android.ui.group.GroupChatScreen
 import com.aman.shiii_android.ui.group.GroupChatViewModel
 import com.aman.shiii_android.ui.master.MasterScreen
 import com.aman.shiii_android.ui.master.MasterViewModel
+import com.aman.shiii_android.notification.AppScreen
+import com.aman.shiii_android.notification.ScreenStateTracker
 import com.aman.shiii_android.ui.settings.SettingsScreen
 import com.aman.shiii_android.ui.theme.*
 
@@ -64,6 +66,16 @@ fun MainContainerScreen(
         masterViewModel.clearMyMessages(scope)
         directChatViewModel.clearMyMessages(scope)
         groupChatViewModel.clearMyMessages(scope)
+    }
+
+    LaunchedEffect(selectedTab) {
+        when (selectedTab) {
+            CoupleTab.SHIII_AI -> ScreenStateTracker.updateScreen(
+                if (isMaster) AppScreen.MASTER_BRIEFINGS else AppScreen.PRIVATE_CHAT
+            )
+            CoupleTab.DIRECT_CHAT -> ScreenStateTracker.updateScreen(AppScreen.DIRECT_CHAT)
+            CoupleTab.GROUP_LOUNGE -> ScreenStateTracker.updateScreen(AppScreen.GROUP_CHAT)
+        }
     }
 
     if (isSettingsOpen) {

@@ -245,7 +245,8 @@ class MasterViewModel @Inject constructor(
             isContinuousChat = true
             repository.sendChatMessage(user.token, messageText).fold(
                 onSuccess = { replyMsg ->
-                    voiceManager.playVoice(replyMsg.content, replyMsg.audioUrl, replyMsg.visemes)
+                    val textToSpeak = replyMsg.englishText ?: replyMsg.content
+                    voiceManager.playVoice(textToSpeak, replyMsg.audioUrl, replyMsg.visemes)
                     _uiState.update { s ->
                         val (merged, _) = mergeMessages(s.chatMessages, listOf(replyMsg))
                         s.copy(
@@ -339,12 +340,14 @@ class MasterViewModel @Inject constructor(
     fun playPendingSpeech() {
         val speech = _uiState.value.pendingSpeech ?: return
         isContinuousChat = true
-        voiceManager.playVoice(speech.content, speech.audioUrl, speech.visemes)
+        val textToSpeak = speech.englishText ?: speech.content
+        voiceManager.playVoice(textToSpeak, speech.audioUrl, speech.visemes)
         _uiState.update { it.copy(pendingSpeech = null) }
     }
 
     fun playMessage(message: ChatMessage) {
-        voiceManager.togglePlay(message.content, message.audioUrl, message.visemes)
+        val textToSpeak = message.englishText ?: message.content
+        voiceManager.togglePlay(textToSpeak, message.audioUrl, message.visemes)
         _uiState.update { it.copy(pendingSpeech = message) }
     }
 

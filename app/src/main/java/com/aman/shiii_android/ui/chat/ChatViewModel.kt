@@ -158,9 +158,10 @@ class ChatViewModel @Inject constructor(
                     if (merged != _uiState.value.messages) {
                         val latestShiii = newlyAdded.lastOrNull { it.senderRole == "shiii" }
                         if (latestShiii != null) {
+                            val textToSpeak = latestShiii.englishText ?: latestShiii.content
                             if (isContinuousChat) {
                                 // In continuous chat, speak automatically
-                                voiceManager.playVoice(latestShiii.content, latestShiii.audioUrl, latestShiii.visemes)
+                                voiceManager.playVoice(textToSpeak, latestShiii.audioUrl, latestShiii.visemes)
                                 _uiState.update { state ->
                                     state.copy(
                                         messages = merged,
@@ -257,8 +258,9 @@ class ChatViewModel @Inject constructor(
             val result = repository.sendChatMessage(user.token, text)
             result.fold(
                 onSuccess = { reply ->
-                    // Continuous chat: speak automatically without asking permission again and again!
-                    voiceManager.playVoice(reply.content, reply.audioUrl, reply.visemes)
+                    // Continuous chat: speak automatically in fluent English TTS!
+                    val textToSpeak = reply.englishText ?: reply.content
+                    voiceManager.playVoice(textToSpeak, reply.audioUrl, reply.visemes)
                     _uiState.update { s ->
                         val (merged, _) = mergeMessages(s.messages, listOf(reply))
                         s.copy(
@@ -288,14 +290,16 @@ class ChatViewModel @Inject constructor(
     fun playPendingSpeech() {
         val speech = _uiState.value.pendingSpeech ?: return
         isContinuousChat = true
-        voiceManager.playVoice(speech.content, speech.audioUrl, speech.visemes)
+        val textToSpeak = speech.englishText ?: speech.content
+        voiceManager.playVoice(textToSpeak, speech.audioUrl, speech.visemes)
     }
 
     /**
      * Plays or pauses voice for a specific message
      */
     fun playMessage(message: ChatMessage) {
-        voiceManager.togglePlay(message.content, message.audioUrl, message.visemes)
+        val textToSpeak = message.englishText ?: message.content
+        voiceManager.togglePlay(textToSpeak, message.audioUrl, message.visemes)
         _uiState.update { it.copy(pendingSpeech = message) }
     }
 

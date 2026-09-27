@@ -295,6 +295,30 @@ private fun ChatBubble(
                     color = if (isShiii) colors.receivedBubbleText else Color.White,
                     lineHeight = 19.sp
                 )
+                if (isShiii && !message.englishText.isNullOrBlank() && message.englishText.trim().lowercase() != message.content.trim().lowercase()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (colors.isDark) Color(0xFF1E2235) else Color(0xFFF3E8FF),
+                        border = BorderStroke(0.5.dp, colors.accentPink.copy(alpha = 0.35f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(text = "🗣️", fontSize = 11.sp)
+                            Text(
+                                text = "English: \"${message.englishText}\"",
+                                fontSize = 11.5.sp,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                color = if (colors.isDark) SoftRose else DeepViolet,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+                }
             }
         }
     }
